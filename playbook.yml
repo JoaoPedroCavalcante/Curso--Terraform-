@@ -1,0 +1,46 @@
+---
+- hosts: terraform-ansible
+  become: yes
+  vars:
+    venv_path: /home/ubuntu/venv
+    project_path: /home/ubuntu/
+  tasks:
+    - name: Instalando python3, pip e ferramentas de virtualenv
+      apt:
+        name:
+          - python3
+          - python3-venv
+          - python3-pip
+          - virtualenv
+        update_cache: yes
+
+    - name: Criar virtualenv (idempotente) como usuário ubuntu
+      become_user: ubuntu
+      command: python3 -m venv {{ venv_path }}
+      args:
+        creates: "{{ venv_path }}/bin/activate"
+
+    - name: Instalar Dependencias com pip dentro do virtualenv (Django e Djangorestframework)
+      become_user: ubuntu
+      pip:
+        virtualenv: "{{ venv_path }}"
+        name:
+          - django
+          - djangorestframework
+
+    - name: Garantir diretório do projeto existe
+      become_user: ubuntu
+      file:
+        path: "{{ project_path }}"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    - name: Iniciando o projeto
+      become_user: ubuntu
+      shell: '. {{ venv_path }}/bin/activate; django-admin startproject setup {{ project_path }}/'
+      args:
+        creates: "{{ project_path }}/setup/manage.py"
+        chdir: /home/ubuntu
+

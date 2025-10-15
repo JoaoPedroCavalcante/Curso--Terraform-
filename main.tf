@@ -28,7 +28,15 @@ resource "aws_instance" "app_server" {
   instance_type = "t3.micro"
   key_name      = "devops-key"
 
+ # user_data = <<EOF
+#!/bin/bash
+#cd /home/ubuntu
+#echo "<h1>Hello, World</h1>" > index.html
+#nohup busybox httpd -f -p 8080 > web.log 2>&1 &
+#EOF
+
   tags = {
-    Name = "Curso-devOps"
+    Name = "Terraform Ansible Python"
   }
 }
+
